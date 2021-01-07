@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 
-namespace linkmir.Models
+namespace linkmir.DbModels
 {
     public class TodoContext : DbContext
     {

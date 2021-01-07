@@ -1,4 +1,4 @@
-namespace linkmir.Models
+namespace linkmir.DbModels
 {
     public class TodoItem
     {

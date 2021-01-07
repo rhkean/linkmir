@@ -3,10 +3,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore;
 
-using linkmir.Models;
+using linkmir.DbModels;
 
 namespace linkmir
 {
@@ -23,6 +22,8 @@ namespace linkmir
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<TodoContext>(opt => opt.UseInMemoryDatabase("TodoList"));
+            services.AddDbContext<LinkmirDbContext>(opt => opt.UseInMemoryDatabase("linkmir"));
+            
             services.AddControllers();
         }
 

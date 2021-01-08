@@ -3,13 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using linkmir.DbModels;
+using linkmir.Models;
 
 namespace linkmir.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("")]
     [ApiController]
     public class LinkmirLinksController : ControllerBase
     {
@@ -22,16 +24,16 @@ namespace linkmir.Controllers
 
         // GET: api/LinkmirLinks
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<LinkmirLink>>> GetLinks()
+        public NoContentResult GetLinks()
         {
-            return await _context.Links.ToListAsync();
+            return NoContent();
         }
 
-        // GET: api/LinkmirLinks/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<LinkmirLink>> GetLinkmirLink(string id)
+        // GET: stats
+        [HttpGet("stats/{shortlink}")]
+        public async Task<ActionResult<LinkmirLink>>  GetStatsOnLink(string shortlink)
         {
-            var linkmirLink = await _context.Links.FindAsync(id);
+            var linkmirLink = await _context.Links.FindAsync(shortlink);
 
             if (linkmirLink == null)
             {
@@ -41,81 +43,79 @@ namespace linkmir.Controllers
             return linkmirLink;
         }
 
-        // PUT: api/LinkmirLinks/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutLinkmirLink(string id, LinkmirLink linkmirLink)
+        // GET: stats
+        [HttpGet("stats/")]
+        public async Task<ActionResult<LinkmirLink>>  GetQueryData(QueryDTO query)
         {
-            if (id != linkmirLink.ShortLink)
-            {
-                return BadRequest();
-            }
+            var linkmirLink = await _context.Links.FindAsync(query.Domain);
 
-            _context.Entry(linkmirLink).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!LinkmirLinkExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        // POST: api/LinkmirLinks
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<LinkmirLink>> PostLinkmirLink(LinkmirLink linkmirLink)
-        {
-            _context.Links.Add(linkmirLink);
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (LinkmirLinkExists(linkmirLink.ShortLink))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return CreatedAtAction("GetLinkmirLink", new { id = linkmirLink.ShortLink }, linkmirLink);
-        }
-
-        // DELETE: api/LinkmirLinks/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteLinkmirLink(string id)
-        {
-            var linkmirLink = await _context.Links.FindAsync(id);
             if (linkmirLink == null)
             {
                 return NotFound();
             }
 
-            _context.Links.Remove(linkmirLink);
-            await _context.SaveChangesAsync();
+            return linkmirLink;
+        }
 
-            return NoContent();
+        // GET: api/LinkmirLinks/5
+        [HttpGet("{shortlink}")]
+        public async Task<ActionResult<LinkDTO>> GetLinkmirLink(string shortlink, bool? redirect = false)
+        {
+            var linkmirLink = await _context.Links.FindAsync(shortlink);
+
+            if (linkmirLink == null)
+            {
+                return NotFound();
+            }
+
+            var toReturn = new LinkDTO
+            {
+                ShortLink = BuildLinkmirUrl(shortlink),
+                Link = linkmirLink.OriginalUri
+            };
+            if(redirect.GetValueOrDefault())
+            {
+                return Redirect(toReturn.Link);
+            }
+            else
+            {
+                return toReturn;
+            }
+        }
+
+        // POST: api/LinkmirLinks
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPost]
+        public async Task<ActionResult<LinkDTO>> SubmitLink(SubmissionRequestDTO submission)
+        {
+            int submissionCount = await submission.AddOrUpdateLink(_context);
+            if (submissionCount == 0)
+            {
+                return BadRequest();
+            }
+
+            var toReturn = new LinkDTO
+            {
+                Link = submission.Link,
+                ShortLink = BuildLinkmirUrl(submission.ShortLink)
+            };
+
+            // return CreatedAtAction("GetLinkmirLink", new { id = linkmirLink.ShortLink }, linkmirLink);
+            if(submissionCount == 1)
+            {
+                return CreatedAtAction(nameof(GetLinkmirLink), new { shortlink = submission.ShortLink}, toReturn);
+            }
+            return Ok(toReturn);
         }
 
         private bool LinkmirLinkExists(string id)
         {
             return _context.Links.Any(e => e.ShortLink == id);
+        }
+
+        private string BuildLinkmirUrl(string shortLink)
+        {
+            return Request.GetDisplayUrl() + shortLink;
         }
     }
 }

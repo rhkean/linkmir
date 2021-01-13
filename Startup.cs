@@ -33,9 +33,6 @@ namespace linkmir
             {
                 app.UseDeveloperExceptionPage();
 
-                //var context = app.ApplicationServices.GetService<LinkmirDbContext>();
-                
-
                 AddTestData(context);
             }
 

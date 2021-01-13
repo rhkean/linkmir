@@ -10,6 +10,6 @@ namespace linkmir.DbModels
 
         }
 
-        public DbSet<LinkmirLink> Links { get; set; }
+        public DbSet<LinkmirLinkDbItem> Links { get; set; }
     }
 }

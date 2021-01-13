@@ -155,4 +155,8 @@ public static class NetworkUtils
         return toReturn;
     }
 
+    public static string GetSubReddit(this Uri uri)
+    {
+        return string.Empty;
+    }
 }

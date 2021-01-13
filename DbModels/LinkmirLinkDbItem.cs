@@ -3,11 +3,11 @@ using System.ComponentModel.DataAnnotations;
 
 namespace linkmir.DbModels
 {
-    public class LinkmirLink
+    public class LinkmirLinkDbItem
     {
         [Key]
         public string ShortLink { get; set; }
-        public string OriginalUri { get; set; }
+        public string Link { get; set; }
         public string Domain { get; set; }
         public string Subdomain { get; set; }
         public int SubmissionCount { get; set; }
@@ -15,16 +15,16 @@ namespace linkmir.DbModels
 
         private Uri _uri;
 
-        public LinkmirLink() {}
+        public LinkmirLinkDbItem() {}
 
-        public LinkmirLink(string link)
+        public LinkmirLinkDbItem(string link)
         {
             if (Uri.TryCreate(link, UriKind.Absolute, out _uri))
             {
                 if(IsValid())
                 {
                     ShortLink = _uri.GetUniqueUrlPath();
-                    OriginalUri = _uri.AbsoluteUri;
+                    Link = _uri.AbsoluteUri;
                     Domain = _uri.GetBaseDomain();
                     Subdomain = _uri.GetSubDomain();
                     SubmissionCount = 1;

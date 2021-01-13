@@ -27,11 +27,16 @@ namespace linkmir
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, LinkmirDbContext context)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+
+                //var context = app.ApplicationServices.GetService<LinkmirDbContext>();
+                
+
+                AddTestData(context);
             }
 
             // app.UseDefaultFiles();
@@ -47,6 +52,20 @@ namespace linkmir
             {
                 endpoints.MapControllers();
             });
+        }
+
+        private void AddTestData(LinkmirDbContext context)
+        {
+            var entryOne = new LinkmirLinkDbItem("https://www.google.com");
+            context.Links.Add(entryOne);
+
+            var entryTwo = new LinkmirLinkDbItem("https://images.google.com");
+            context.Links.Add(entryTwo);
+
+            var entryThree = new LinkmirLinkDbItem("https://open.spotify.com");
+            context.Links.Add(entryThree);
+
+            context.SaveChanges();
         }
     }
 }

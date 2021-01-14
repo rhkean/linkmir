@@ -10,9 +10,11 @@ This webapi application is a code challenge exercise for Quicken Loans.
 1. From Visual Studio Code, open the integrated terminal
 2. Change to the folder that will contain the project folder (ex. C:\projects or /home/user/projects )
 3. from terminal window execute: 
-`git clone https://github.com/rhkean/linkmir.git
+```
+git clone https://github.com/rhkean/linkmir.git
 cd linkmir
 code -r linkmir`
+```
 4. When prompted (in the lower right corner) to load missing dependencies, select 'Yes'
 5. The project should now compile and run at http://localhost:5000/Zja8syffynb
 ---
